@@ -1,0 +1,111 @@
+@using HealthInsuranceClaims.Application.ViewModels.Policies
+@model List<CustomerPolicyDisplayViewModel>
+@{
+    ViewData["Title"] = "My Insurance Policies";
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-primary me-2"></i>My Assigned Policies</h3>
+        <p class="text-muted mb-0">View your active health insurance policies, coverage categories, and exclusion terms</p>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="row g-4">
+        @foreach (var policy in Model)
+        {
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-navy text-white py-3 d-flex justify-content-between align-items-center" style="background-color: #1a2e4c;">
+                        <div>
+                            <span class="badge bg-info text-dark mb-1">@policy.PolicyNumber</span>
+                            <h5 class="fw-bold mb-0 text-white">@policy.PolicyName</h5>
+                        </div>
+                        <span class="badge @(policy.IsActive ? "bg-success" : "bg-danger") px-3 py-2">
+                            @(policy.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-secondary small mb-3">@policy.PolicyDescription</p>
+
+                        <div class="row g-2 mb-3 bg-light p-3 rounded">
+                            <div class="col-6">
+                                <span class="text-muted small d-block">Policy Type:</span>
+                                <span class="fw-semibold">@policy.PolicyType</span>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-muted small d-block">Overall Limit:</span>
+                                <span class="fw-bold text-primary">
+                                    @(policy.OverallCoverageLimit.HasValue ? $"₹{policy.OverallCoverageLimit.Value:N2}" : "No Overall Cap")
+                                </span>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <span class="text-muted small d-block">Valid From:</span>
+                                <span class="small fw-semibold">@policy.AssignedDate.ToString("dd-MMM-yyyy")</span>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <span class="text-muted small d-block">Valid Until:</span>
+                                <span class="small fw-semibold text-danger">@policy.ExpiryDate.ToString("dd-MMM-yyyy")</span>
+                            </div>
+                        </div>
+
+                        <!-- Configured Coverage Caps -->
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-list-check me-1 text-success"></i>Configured Expense Coverages</h6>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm table-bordered small mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Limit</th>
+                                        <th>Rule Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var cov in policy.Coverages)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold text-dark">@cov.ExpenseCategory</td>
+                                            <td class="text-success fw-bold">₹@cov.MaxCoverageAmount.ToString("N2")</td>
+                                            <td class="text-muted">@cov.CoverageDescription</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Policy Exclusions -->
+                        @if (policy.Exclusions.Any())
+                        {
+                            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-slash-circle me-1 text-danger"></i>Policy Exclusions</h6>
+                            <ul class="list-group list-group-flush small mb-3">
+                                @foreach (var exc in policy.Exclusions)
+                                {
+                                    <li class="list-group-item px-0 py-1 text-danger">
+                                        <i class="bi bi-x-circle-fill me-1"></i><strong>@exc.ExcludedCategory:</strong> @exc.ExclusionDescription
+                                    </li>
+                                }
+                            </ul>
+                        }
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <a asp-action="PolicyDetails" asp-route-id="@policy.PolicyId" class="btn btn-outline-primary btn-sm">
+                                Full Policy Terms &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0 p-5 text-center">
+        <i class="bi bi-shield-x text-muted mb-3" style="font-size: 3rem;"></i>
+        <h5 class="fw-bold text-dark">No Policies Assigned</h5>
+        <p class="text-muted">You do not currently have an insurance policy assigned to your customer account. Please contact an Administrator to assign a policy.</p>
+    </div>
+}

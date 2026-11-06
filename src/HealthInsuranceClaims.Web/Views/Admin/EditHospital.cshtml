@@ -1,0 +1,58 @@
+@using HealthInsuranceClaims.Application.ViewModels.Hospitals
+@model HospitalViewModel
+@{
+    ViewData["Title"] = "Edit Hospital";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-navy text-white py-3" style="background-color: #1a2e4c;">
+                <h5 class="mb-0 fw-bold text-white"><i class="bi bi-pencil-square me-2"></i>Edit Hospital: @Model.HospitalName</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="EditHospital" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="HospitalId" />
+
+                    <div class="mb-3">
+                        <label asp-for="HospitalName" class="form-label fw-semibold">Hospital Name <span class="text-danger">*</span></label>
+                        <input asp-for="HospitalName" class="form-control" required />
+                        <span asp-validation-for="HospitalName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label fw-semibold">Address</label>
+                        <textarea asp-for="Address" rows="2" class="form-control"></textarea>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="ContactNumber" class="form-label fw-semibold">Contact Number</label>
+                            <input asp-for="ContactNumber" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                            <input asp-for="Email" type="email" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" id="hospActiveEditSwitch" />
+                        <label class="form-check-label fw-semibold" for="hospActiveEditSwitch">Active Network Hospital</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Hospitals" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

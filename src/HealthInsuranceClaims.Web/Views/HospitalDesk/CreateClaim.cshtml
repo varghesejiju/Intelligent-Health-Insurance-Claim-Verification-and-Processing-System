@@ -1,0 +1,200 @@
+@model HealthInsuranceClaims.Application.ViewModels.Claims.CreateClaimViewModel
+@using HealthInsuranceClaims.Application.ViewModels.Policies
+@{
+    ViewData["Title"] = "Initiate Patient Insurance Claim";
+    var customerPolicies = ViewBag.CustomerPolicies as List<CustomerPolicySelectionViewModel> ?? new List<CustomerPolicySelectionViewModel>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+                <a asp-action="Dashboard" class="text-decoration-none text-muted small">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </a>
+                <h2 class="h3 fw-bold mb-0 text-dark mt-1">Initiate Patient Insurance Claim</h2>
+                <small class="text-muted">Direct Hospital Submission &bull; @ViewBag.HospitalName</small>
+            </div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6">
+                <i class="bi bi-hospital me-1"></i> Hospital Desk Action
+            </span>
+        </div>
+
+        <!-- Workflow Step Indicator -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4 bg-light">
+            <div class="card-body py-3">
+                <div class="row text-center">
+                    <div class="col-3">
+                        <div class="fw-bold text-primary"><i class="bi bi-1-circle-fill me-1"></i> Policy Details</div>
+                        <small class="text-muted d-block">Current Step</small>
+                    </div>
+                    <div class="col-3">
+                        <div class="fw-semibold text-secondary"><i class="bi bi-2-circle me-1"></i> Quotation Items</div>
+                        <small class="text-muted d-block">Next: Add Expenses</small>
+                    </div>
+                    <div class="col-3">
+                        <div class="fw-semibold text-secondary"><i class="bi bi-3-circle me-1"></i> Upload Bills</div>
+                        <small class="text-muted d-block">Bill & Discharge Summary</small>
+                    </div>
+                    <div class="col-3">
+                        <div class="fw-semibold text-secondary"><i class="bi bi-4-circle me-1"></i> Submit</div>
+                        <small class="text-muted d-block">Send to Officer</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-file-earmark-medical text-primary me-2"></i>Patient Insurance Information
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Please review and correct the errors below.
+                        <div asp-validation-summary="All" class="text-danger small mt-2"></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-action="CreateClaim" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="HospitalId" value="@ViewBag.HospitalId" />
+
+                    <!-- Patient Policy Selection -->
+                    <div class="mb-4">
+                        <label asp-for="PolicyId" class="form-label fw-semibold">
+                            Select Patient Active Policy <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="PolicyId" class="form-select form-select-lg" id="policySelect" required onchange="onPolicySelected()">
+                            <option value="">-- Choose Patient / Policy ID --</option>
+                            @foreach (var cp in customerPolicies)
+                            {
+                                <option value="@cp.PolicyId" 
+                                        data-customer-id="@cp.CustomerId" 
+                                        data-customer-name="@cp.CustomerName"
+                                        data-policy-number="@cp.PolicyNumber"
+                                        data-coverage-limit="@(cp.OverallCoverageLimit.HasValue ? cp.OverallCoverageLimit.Value.ToString("N0") : "Unlimited")"
+                                        data-expiry="@cp.ExpiryDate.ToString("dd-MMM-yyyy")">
+                                    @cp.DisplayText
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="PolicyId" class="text-danger small"></span>
+                        <div class="form-text">
+                            Select the patient's verified insurance policy ID. Only active, non-expired customer policies appear here.
+                        </div>
+                    </div>
+
+                    <input type="hidden" asp-for="CustomerId" id="hiddenCustomerId" />
+
+                    <!-- Selected Policy Details Preview Box -->
+                    <div id="policyInfoBox" class="alert alert-info d-none mb-4">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="bi bi-shield-check fs-4 me-2"></i>
+                            <h6 class="mb-0 fw-bold" id="infoPolicyNumber"></h6>
+                        </div>
+                        <div class="row g-2 mt-1 small">
+                            <div class="col-md-6">
+                                <strong>Insured Patient:</strong> <span id="infoPatientName"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Overall Limit:</strong> ₹<span id="infoCoverageLimit"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Valid Till:</strong> <span id="infoExpiryDate"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            <label asp-for="PatientName" class="form-label fw-semibold">Patient Name <span class="text-danger">*</span></label>
+                            <input asp-for="PatientName" class="form-control" id="patientNameInput" placeholder="Full name of the admitted patient" required />
+                            <span asp-validation-for="PatientName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="ClaimType" class="form-label fw-semibold">Claim Type <span class="text-danger">*</span></label>
+                            <select asp-for="ClaimType" class="form-select">
+                                <option value="Cashless" selected>Cashless (Hospital Direct Settlement)</option>
+                                <option value="Reimbursement">Reimbursement</option>
+                            </select>
+                            <span asp-validation-for="ClaimType" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="AdmissionDate" class="form-label fw-semibold">Hospital Admission Date <span class="text-danger">*</span></label>
+                            <input asp-for="AdmissionDate" type="date" class="form-control" required />
+                            <span asp-validation-for="AdmissionDate" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DischargeDate" class="form-label fw-semibold">Hospital Discharge Date <span class="text-danger">*</span></label>
+                            <input asp-for="DischargeDate" type="date" class="form-control" required />
+                            <span asp-validation-for="DischargeDate" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ClaimDescription" class="form-label fw-semibold">Diagnosis / Treatment Description</label>
+                        <textarea asp-for="ClaimDescription" rows="3" class="form-control" placeholder="Describe the admission cause, primary diagnosis, surgical procedure or medical treatment details..."></textarea>
+                        <span asp-validation-for="ClaimDescription" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a asp-action="Dashboard" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            Proceed to Quotation & Bills <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function onPolicySelected() {
+            var select = document.getElementById('policySelect');
+            var selectedOption = select.options[select.selectedIndex];
+            var infoBox = document.getElementById('policyInfoBox');
+            var hiddenCustomerId = document.getElementById('hiddenCustomerId');
+            var patientNameInput = document.getElementById('patientNameInput');
+
+            if (selectedOption && selectedOption.value) {
+                var customerId = selectedOption.getAttribute('data-customer-id');
+                var customerName = selectedOption.getAttribute('data-customer-name');
+                var policyNumber = selectedOption.getAttribute('data-policy-number');
+                var limit = selectedOption.getAttribute('data-coverage-limit');
+                var expiry = selectedOption.getAttribute('data-expiry');
+
+                hiddenCustomerId.value = customerId;
+                if (!patientNameInput.value) {
+                    patientNameInput.value = customerName;
+                }
+
+                document.getElementById('infoPolicyNumber').innerText = policyNumber;
+                document.getElementById('infoPatientName').innerText = customerName;
+                document.getElementById('infoCoverageLimit').innerText = limit;
+                document.getElementById('infoExpiryDate').innerText = expiry;
+                infoBox.classList.remove('d-none');
+            } else {
+                infoBox.classList.add('d-none');
+                hiddenCustomerId.value = '';
+            }
+        }
+
+        // Run on load in case of postback validation
+        document.addEventListener('DOMContentLoaded', function () {
+            onPolicySelected();
+        });
+    </script>
+}

@@ -1,0 +1,137 @@
+@using HealthInsuranceClaims.Application.ViewModels.Dashboard
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "System Administration Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="row align-items-center mb-4">
+    <div class="col-md-8">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-speedometer2 text-danger me-2"></i>Administration Dashboard
+        </h3>
+        <p class="text-muted mb-0">System Overview, Policy Governance, Network Operations & Audit Logging</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a asp-action="CreatePolicy" class="btn btn-primary fw-semibold px-3 py-2 shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> New Insurance Policy
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Stat Metric Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card shadow-sm border-0 stat-card p-3">
+            <span class="text-muted small fw-semibold text-uppercase">Customers</span>
+            <h3 class="fw-bold mb-0 text-dark">@Model.TotalCustomers</h3>
+            <a asp-action="Users" class="small text-primary text-decoration-none mt-2 d-inline-block">Manage &rarr;</a>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card shadow-sm border-0 stat-card stat-success p-3">
+            <span class="text-muted small fw-semibold text-uppercase">Officers</span>
+            <h3 class="fw-bold mb-0 text-dark">@Model.TotalOfficers</h3>
+            <a asp-action="Users" class="small text-success text-decoration-none mt-2 d-inline-block">Manage &rarr;</a>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card shadow-sm border-0 stat-card stat-info p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Policies</span>
+                    <h3 class="fw-bold mb-0 text-dark">@Model.TotalPolicies</h3>
+                </div>
+            </div>
+            <a asp-action="Policies" class="small text-info text-decoration-none mt-2 d-inline-block">(@Model.ActivePolicies active) &rarr;</a>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card shadow-sm border-0 stat-card stat-warning p-3">
+            <span class="text-muted small fw-semibold text-uppercase">Hospitals</span>
+            <h3 class="fw-bold mb-0 text-dark">@Model.TotalHospitals</h3>
+            <a asp-action="Hospitals" class="small text-warning text-decoration-none mt-2 d-inline-block">Network &rarr;</a>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card shadow-sm border-0 stat-card stat-danger p-3">
+            <span class="text-muted small fw-semibold text-uppercase">Total Claims</span>
+            <h3 class="fw-bold mb-0 text-dark">@Model.TotalClaims</h3>
+            <a asp-action="Claims" class="small text-danger text-decoration-none mt-2 d-inline-block">All claims &rarr;</a>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card shadow-sm border-0 stat-card stat-success p-3">
+            <span class="text-muted small fw-semibold text-uppercase">Approved Total</span>
+            <h4 class="fw-bold mb-0 text-success">₹@Model.AggregateApprovedAmount.ToString("N0")</h4>
+            <span class="small text-muted mt-2 d-inline-block">Disbursed</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Status Breakdown -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-pie-chart-fill text-primary me-2"></i>Claims by Status Breakdown</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-2">
+                    @foreach (var kvp in Model.ClaimsByStatus)
+                    {
+                        <div class="col-sm-6">
+                            <div class="p-2 border rounded d-flex justify-content-between align-items-center">
+                                <partial name="_StatusBadge" model="kvp.Key" />
+                                <span class="fw-bold fs-6 text-dark">@kvp.Value</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Audit Logs -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-text text-danger me-2"></i>Recent System Audit Activity</h5>
+                <a asp-action="AuditLogs" class="btn btn-sm btn-outline-danger">Full Log &rarr;</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Action</th>
+                                <th>User</th>
+                                <th>Details</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in Model.RecentAuditLogs)
+                            {
+                                <tr>
+                                    <td><span class="badge bg-light text-dark border">@log.Action</span></td>
+                                    <td class="fw-semibold">@log.UserName</td>
+                                    <td class="text-muted text-truncate" style="max-width: 200px;">@log.Details</td>
+                                    <td class="text-muted small">@log.Timestamp.ToString("dd-MMM HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

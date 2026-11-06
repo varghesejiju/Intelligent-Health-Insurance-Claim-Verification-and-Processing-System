@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <div class="card shadow-sm border-0 p-4">
+            <div class="card-body">
+                <div class="text-danger mb-3">
+                    <i class="bi bi-shield-slash-fill" style="font-size: 4rem;"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-2">Access Denied (403)</h2>
+                <p class="text-muted fs-6 mb-4">
+                    You do not have the required permissions or authorization role to access this section of the Health Insurance Claim Verification System.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">
+                        <i class="bi bi-house-door me-1"></i> Return Home
+                    </a>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-primary">
+                                <i class="bi bi-speedometer2 me-1"></i> Admin Dashboard
+                            </a>
+                        }
+                        else if (User.IsInRole("InsuranceOfficer"))
+                        {
+                            <a asp-controller="Officer" asp-action="Dashboard" class="btn btn-primary">
+                                <i class="bi bi-clipboard2-pulse me-1"></i> Officer Dashboard
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Customer" asp-action="Dashboard" class="btn btn-primary">
+                                <i class="bi bi-person-workspace me-1"></i> Customer Dashboard
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

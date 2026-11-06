@@ -1,0 +1,115 @@
+@using HealthInsuranceClaims.Application.ViewModels.Policies
+@model CustomerPolicyDisplayViewModel
+@{
+    ViewData["Title"] = $"Policy Details - {Model.PolicyNumber}";
+    Layout = "_Layout";
+}
+
+<div class="mb-4">
+    <a asp-action="Policies" class="btn btn-outline-secondary btn-sm mb-2">
+        <i class="bi bi-arrow-left me-1"></i> Back to My Policies
+    </a>
+    <h3 class="fw-bold text-dark mb-1">@Model.PolicyName</h3>
+    <span class="badge bg-primary me-2">@Model.PolicyNumber</span>
+    <span class="badge bg-secondary">@Model.PolicyType</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-card-text me-2 text-primary"></i>Policy Overview</h5>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-secondary">@Model.PolicyDescription</p>
+
+                <h6 class="fw-bold text-dark mt-4 mb-3">Covered Expense Categories & Limits</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Expense Category</th>
+                                <th>Max Coverage Limit</th>
+                                <th>Limit Type</th>
+                                <th>Terms</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cov in Model.Coverages)
+                            {
+                                <tr>
+                                    <td class="fw-bold text-dark">@cov.ExpenseCategory</td>
+                                    <td class="text-success fw-bold">₹@cov.MaxCoverageAmount.ToString("N2")</td>
+                                    <td><span class="badge bg-light text-dark border">@cov.CoverageLimitType</span></td>
+                                    <td class="small text-muted">@cov.CoverageDescription</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (Model.Exclusions.Any())
+                {
+                    <h6 class="fw-bold text-danger mt-4 mb-3"><i class="bi bi-slash-circle me-1"></i>Explicit Policy Exclusions</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-danger table-striped small align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Excluded Category</th>
+                                    <th>Exclusion Clause</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var exc in Model.Exclusions)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@exc.ExcludedCategory</td>
+                                        <td>@exc.ExclusionDescription</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-light py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-info-circle me-2 text-primary"></i>Policy Parameters</h6>
+            </div>
+            <div class="card-body p-3">
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Overall Coverage Cap:</span>
+                        <span class="fw-bold text-primary">
+                            @(Model.OverallCoverageLimit.HasValue ? $"₹{Model.OverallCoverageLimit.Value:N2}" : "Uncapped")
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Assigned Date:</span>
+                        <span class="fw-semibold">@Model.AssignedDate.ToString("dd-MMM-yyyy")</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Expiry Date:</span>
+                        <span class="fw-semibold text-danger">@Model.ExpiryDate.ToString("dd-MMM-yyyy")</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Policy Status:</span>
+                        <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger")">
+                            @(Model.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </li>
+                </ul>
+
+                <div class="d-grid mt-4">
+                    <a asp-controller="Claims" asp-action="Create" class="btn btn-primary fw-semibold">
+                        <i class="bi bi-plus-circle me-1"></i> Submit Claim on Policy
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

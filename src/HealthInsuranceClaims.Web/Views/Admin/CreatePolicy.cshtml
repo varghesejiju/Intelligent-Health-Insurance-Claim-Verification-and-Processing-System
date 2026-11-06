@@ -1,0 +1,94 @@
+@using HealthInsuranceClaims.Application.ViewModels.Policies
+@model PolicyFormViewModel
+@{
+    ViewData["Title"] = "Create Insurance Policy";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-navy text-white py-3" style="background-color: #1a2e4c;">
+                <h5 class="mb-0 fw-bold text-white"><i class="bi bi-file-earmark-plus me-2"></i>Create New Master Insurance Policy</h5>
+            </div>
+            <div class="card-body p-4">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Please correct the input errors below.
+                        <div asp-validation-summary="All" class="text-danger small mt-2"></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-action="CreatePolicy" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="PolicyNumber" class="form-label fw-semibold">Policy Identification Code / Number <span class="text-danger">*</span></label>
+                            <input asp-for="PolicyNumber" class="form-control" placeholder="e.g. POL-SHIELD-2026-001" required />
+                            <span asp-validation-for="PolicyNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PolicyName" class="form-label fw-semibold">Policy Commercial Name <span class="text-danger">*</span></label>
+                            <input asp-for="PolicyName" class="form-control" placeholder="e.g. Health Shield Gold Care" required />
+                            <span asp-validation-for="PolicyName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PolicyType" class="form-label fw-semibold">Policy Category</label>
+                            <select asp-for="PolicyType" class="form-select">
+                                <option value="Individual">Individual Plan</option>
+                                <option value="FamilyFloater">Family Floater</option>
+                                <option value="CriticalIllness">Critical Illness Shield</option>
+                                <option value="SeniorCitizen">Senior Citizen Plan</option>
+                                <option value="Group">Corporate / Group Plan</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="OverallCoverageLimit" class="form-label fw-semibold">Overall Aggregate Policy Limit (₹)</label>
+                            <input asp-for="OverallCoverageLimit" type="number" step="1000" class="form-control" placeholder="500000" />
+                            <small class="text-muted">Leave empty if uncapped across all categories.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="StartDate" class="form-label fw-semibold">Tenure Start Date <span class="text-danger">*</span></label>
+                            <input asp-for="StartDate" type="date" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="EndDate" class="form-label fw-semibold">Tenure End Date <span class="text-danger">*</span></label>
+                            <input asp-for="EndDate" type="date" class="form-control" required />
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="PolicyDescription" class="form-label fw-semibold">Policy Description & Key Terms</label>
+                            <textarea asp-for="PolicyDescription" rows="3" class="form-control" placeholder="Summarize policy benefits, hospitalization clauses, and eligibility requirements..."></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" id="isActiveSwitch" checked />
+                                <label class="form-check-label fw-semibold" for="isActiveSwitch">Enable Policy for Immediate Customer Issuance</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <a asp-action="Policies" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            Save & Configure Coverages &rarr;
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

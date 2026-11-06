@@ -1,0 +1,259 @@
+@using HealthInsuranceClaims.Application.ViewModels.Policies
+@model PolicyDetailsViewModel
+@{
+    ViewData["Title"] = $"Configure Rules - {Model.PolicyNumber}";
+    Layout = "_Layout";
+    var covModel = ViewBag.CoverageModel as CoverageFormViewModel ?? new CoverageFormViewModel { PolicyId = Model.PolicyId };
+    var excModel = ViewBag.ExclusionModel as ExclusionFormViewModel ?? new ExclusionFormViewModel { PolicyId = Model.PolicyId };
+}
+
+<div class="mb-4">
+    <a asp-action="Policies" class="btn btn-outline-secondary btn-sm mb-2">
+        <i class="bi bi-arrow-left me-1"></i> Back to Policy Catalog
+    </a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-gear-wide-connected text-primary me-2"></i>Policy Rules Configuration: @Model.PolicyName
+            </h3>
+            <span class="badge bg-primary me-2">@Model.PolicyNumber</span>
+            <span class="badge bg-secondary me-2">@Model.PolicyType</span>
+            <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger")">@(Model.IsActive ? "Active" : "Inactive")</span>
+        </div>
+        <div class="mt-2 mt-md-0">
+            <button type="button" class="btn btn-success btn-sm fw-semibold me-2" data-bs-toggle="modal" data-bs-target="#addCoverageModal">
+                <i class="bi bi-plus-circle me-1"></i> Add Coverage Cap
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addExclusionModal">
+                <i class="bi bi-slash-circle me-1"></i> Add Policy Exclusion
+            </button>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Category Coverages -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-shield-check text-success me-2"></i>Configured Category Coverage Rules
+                </h5>
+                <span class="badge bg-success-subtle text-success border border-success-subtle">@Model.Coverages.Count rule(s)</span>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.Coverages.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Max Limit (₹)</th>
+                                    <th>Limit Type</th>
+                                    <th>Description</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cov in Model.Coverages)
+                                {
+                                    <tr>
+                                        <td class="fw-bold text-dark">@cov.ExpenseCategory</td>
+                                        <td class="text-success fw-bold">₹@cov.MaxCoverageAmount.ToString("N2")</td>
+                                        <td><span class="badge bg-light text-dark border">@cov.CoverageLimitType</span></td>
+                                        <td class="small text-muted">@cov.CoverageDescription</td>
+                                        <td class="text-end">
+                                            <form asp-action="DeleteCoverage" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="coverageId" value="@cov.CoverageId" />
+                                                <input type="hidden" name="policyId" value="@Model.PolicyId" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Delete rule" onclick="return confirm('Remove coverage rule for @cov.ExpenseCategory?');">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-exclamation-circle text-warning fs-1 d-block mb-2"></i>
+                        <p class="mb-2">No category coverage limits configured for this policy.</p>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCoverageModal">
+                            Add First Coverage Rule
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Exclusions -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-danger">
+                    <i class="bi bi-slash-circle me-2"></i>Policy Exclusions
+                </h5>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">@Model.Exclusions.Count exclusion(s)</span>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.Exclusions.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Exclusion Clause</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var exc in Model.Exclusions)
+                                {
+                                    <tr>
+                                        <td class="fw-bold text-danger">@exc.ExcludedCategory</td>
+                                        <td class="small text-muted">@exc.ExclusionDescription</td>
+                                        <td class="text-end">
+                                            <form asp-action="DeleteExclusion" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="exclusionId" value="@exc.ExclusionId" />
+                                                <input type="hidden" name="policyId" value="@Model.PolicyId" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Delete exclusion" onclick="return confirm('Remove exclusion for @exc.ExcludedCategory?');">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-2">No categories are explicitly excluded under this policy.</p>
+                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#addExclusionModal">
+                            Add Exclusion Rule
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Coverage -->
+<div class="modal fade" id="addCoverageModal" tabindex="-1" aria-labelledby="addCoverageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="addCoverageModalLabel"><i class="bi bi-plus-circle me-1"></i> Add Category Coverage Limit</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="AddCoverage" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="PolicyId" value="@Model.PolicyId" />
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Expense Category <span class="text-danger">*</span></label>
+                        <select name="ExpenseCategory" class="form-select" required>
+                            <option value="HospitalRoomCharges">Hospital Room Charges</option>
+                            <option value="SurgeryCharges">Surgery Charges</option>
+                            <option value="DoctorConsultation">Doctor Consultation</option>
+                            <option value="MedicineExpenses">Medicine Expenses</option>
+                            <option value="LaboratoryTests">Laboratory Tests</option>
+                            <option value="DiagnosticScans">Diagnostic Scans</option>
+                            <option value="OtherMedicalExpenses">Other Medical Expenses</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Maximum Coverage Cap (₹) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" min="1" name="MaxCoverageAmount" class="form-control" placeholder="10000.00" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Limit Application Mode</label>
+                        <select name="CoverageLimitType" class="form-select">
+                            <option value="CategoryCap">Category Cap (Upper ceiling per category)</option>
+                            <option value="PerClaimLimit">Per Claim Maximum</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rule Terms Description</label>
+                        <textarea name="CoverageDescription" rows="2" class="form-control" placeholder="e.g. Standard private AC room rent limit per day..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success fw-semibold">Save Coverage Rule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Exclusion -->
+<div class="modal fade" id="addExclusionModal" tabindex="-1" aria-labelledby="addExclusionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="addExclusionModalLabel"><i class="bi bi-slash-circle me-1"></i> Add Policy Exclusion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="AddExclusion" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="PolicyId" value="@Model.PolicyId" />
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Excluded Category <span class="text-danger">*</span></label>
+                        <select name="ExcludedCategory" class="form-select" required>
+                            <option value="OtherMedicalExpenses">Other Medical Expenses</option>
+                            <option value="HospitalRoomCharges">Hospital Room Charges</option>
+                            <option value="SurgeryCharges">Surgery Charges</option>
+                            <option value="DoctorConsultation">Doctor Consultation</option>
+                            <option value="MedicineExpenses">Medicine Expenses</option>
+                            <option value="LaboratoryTests">Laboratory Tests</option>
+                            <option value="DiagnosticScans">Diagnostic Scans</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Exclusion Reason / Policy Clause <span class="text-danger">*</span></label>
+                        <textarea name="ExclusionDescription" rows="3" class="form-control" placeholder="e.g. Cosmetic procedures, comfort kits, and unprescribed supplements are not covered..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger fw-semibold">Save Exclusion</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

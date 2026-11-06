@@ -1,0 +1,38 @@
+## Visual Studio & .NET Build Artifacts
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rms/
+[Aa]rm64/
+build/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+.vs/
+.vscode/
+
+## Test & Coverage Output
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+TempTestUploads/
+
+## System & IDE Files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+
+## Reports & Documentation (Excluded per Project Upload Specifications)
+docs/
+*.doc
+*.docx
+PROJECT_REPORT*
+
+

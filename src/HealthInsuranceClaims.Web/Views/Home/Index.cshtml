@@ -1,0 +1,174 @@
+@{
+    ViewData["Title"] = "Home - Intelligent Health Insurance Claim Verification and Processing System";
+    Layout = "_Layout";
+}
+
+<div class="py-4">
+    <!-- Hero Banner -->
+    <div class="p-5 mb-4 bg-white rounded-3 shadow-sm border border-light">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold mb-3">
+                    <i class="bi bi-mortarboard-fill me-1"></i> MCA Final-Year Project Demonstration
+                </span>
+                <h1 class="display-6 fw-bold text-dark mb-3">
+                    Intelligent Health Insurance Claim Verification and Processing System
+                </h1>
+                <p class="fs-5 text-muted mb-4">
+                    A comprehensive, rule-governed health insurance management platform. Facilitates end-to-end expense itemization, automated coverage and exclusion verification, manual-review exception tracking, and officer adjudication workflows.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4 fw-semibold">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Launch Application
+                    </a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4">
+                        <i class="bi bi-person-plus me-1"></i> Register as Customer
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+                <div class="p-4 bg-light rounded-circle d-inline-block shadow-sm">
+                    <i class="bi bi-shield-check text-primary" style="font-size: 7rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Quick Access Cards for Viva -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm border-0 stat-card stat-warning">
+                <div class="card-body p-3 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-2 bg-warning-subtle text-warning rounded-3 me-2">
+                            <i class="bi bi-hospital fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Hospital TPA Desk</h6>
+                            <small class="text-muted">Direct Submission</small>
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-3 flex-grow-1">
+                        <li>Initiate claim for admitted patient</li>
+                        <li>Itemize medical quotations & charges</li>
+                        <li>Upload hospital bills & discharge summary</li>
+                        <li>Respond to officer clarifications</li>
+                    </ul>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-warning text-dark btn-sm w-100 fw-semibold">
+                        Hospital Desk <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm border-0 stat-card">
+                <div class="card-body p-3 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-2 bg-primary-subtle text-primary rounded-3 me-2">
+                            <i class="bi bi-person fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Patient Portal</h6>
+                            <small class="text-muted">Policyholder Enquiry</small>
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-3 flex-grow-1">
+                        <li>View assigned policies & expiry dates</li>
+                        <li>Inspect policy coverage caps & exclusions</li>
+                        <li>Enquire live claim processing status</li>
+                        <li>Track approved settlement amounts</li>
+                    </ul>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-sm w-100 fw-semibold">
+                        Patient Login <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm border-0 stat-card stat-success">
+                <div class="card-body p-3 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-2 bg-success-subtle text-success rounded-3 me-2">
+                            <i class="bi bi-person-check fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Insurance Officer</h6>
+                            <small class="text-muted">Review & Adjudication</small>
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-3 flex-grow-1">
+                        <li>Inspect submitted claims in review queue</li>
+                        <li>Review automatic policy verification</li>
+                        <li>Check eligible vs deduction calculations</li>
+                        <li>Approve, partially approve, or reject</li>
+                    </ul>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-success btn-sm w-100 fw-semibold">
+                        Officer Login <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm border-0 stat-card stat-danger">
+                <div class="card-body p-3 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-2 bg-danger-subtle text-danger rounded-3 me-2">
+                            <i class="bi bi-person-gear fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Administrator</h6>
+                            <small class="text-muted">Governance & Config</small>
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-3 flex-grow-1">
+                        <li>Manage insurance policies & limits</li>
+                        <li>Configure rules & policy exclusions</li>
+                        <li>Manage network hospitals & user roles</li>
+                        <li>Inspect immutable system audit logs</li>
+                    </ul>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-danger btn-sm w-100 fw-semibold">
+                        Admin Login <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Architecture Highlights -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light py-3">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-cpu-fill text-primary me-2"></i>Core System Architecture & Academic Highlights</h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded">
+                        <div class="fw-bold text-primary mb-1"><i class="bi bi-calculator me-1"></i> Rule-Based Engine</div>
+                        <p class="small text-muted mb-0">Calculates eligible vs. non-eligible amounts with C# <code>decimal</code> financial precision without hard-coded limits.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded">
+                        <div class="fw-bold text-success mb-1"><i class="bi bi-shield-lock me-1"></i> Secure Storage</div>
+                        <p class="small text-muted mb-0">Medical documents are stored outside <code>wwwroot</code> with cryptographic filenames and authenticated streaming downloads.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded">
+                        <div class="fw-bold text-info mb-1"><i class="bi bi-diagram-3 me-1"></i> Workflow State Machine</div>
+                        <p class="small text-muted mb-0">Strict status lifecycle preventing unauthorized status jumps or tampering of submitted claims.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded">
+                        <div class="fw-bold text-warning mb-1"><i class="bi bi-journal-check me-1"></i> Comprehensive Auditing</div>
+                        <p class="small text-muted mb-0">All user logins, claims submissions, verification executions, and officer decisions recorded immutably.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

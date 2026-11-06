@@ -1,0 +1,105 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Sign In - Health Insurance Portal";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-shield-lock-fill fs-3 me-2"></i>
+                    <div>
+                        <h4 class="mb-0 fs-5 fw-bold">Sign In</h4>
+                        <small class="text-white-50">Intelligent Claim Verification System</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Please review the errors below.
+                        <div asp-validation-summary="All" class="text-danger small mt-2"></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-action="Login" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Email" class="form-control" placeholder="name@example.com" id="loginEmail" required />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
+                            <input asp-for="Password" class="form-control" placeholder="••••••••" id="loginPassword" required />
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label">Remember my login</label>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <p class="text-muted small mb-0">Don't have an account? <a asp-action="Register" class="text-primary fw-semibold text-decoration-none">Register as Customer</a></p>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light border-0 p-3">
+                <div class="small fw-semibold text-secondary mb-2">
+                    <i class="bi bi-info-circle me-1"></i> Demonstration Quick Credentials (Viva Showcase):
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="fillCreds('admin@insurance.com', 'Admin@123')">
+                        <i class="bi bi-person-gear me-1"></i> Admin
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm" onclick="fillCreds('officer1@insurance.com', 'Officer@123')">
+                        <i class="bi bi-person-check me-1"></i> Officer
+                    </button>
+                    <button type="button" class="btn btn-outline-warning btn-sm text-dark" onclick="fillCreds('apollo.desk@apollohospital.com', 'Hospital@123')">
+                        <i class="bi bi-hospital me-1"></i> Hospital Desk
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="fillCreds('customer1@gmail.com', 'Customer@123')">
+                        <i class="bi bi-person me-1"></i> Customer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function fillCreds(email, password) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = password;
+        }
+    </script>
+}

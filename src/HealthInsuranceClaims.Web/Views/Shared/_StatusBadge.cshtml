@@ -1,0 +1,53 @@
+@model HealthInsuranceClaims.Domain.Enums.ClaimStatus
+
+@switch (Model)
+{
+    case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Draft:
+        <span class="status-badge badge-draft">
+            <i class="bi bi-file-earmark"></i> Draft
+        </span>
+        break;
+    case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Submitted:
+        <span class="status-badge badge-submitted">
+            <i class="bi bi-arrow-up-circle"></i> Submitted
+        </span>
+        break;
+    case HealthInsuranceClaims.Domain.Enums.ClaimStatus.UnderReview:
+        <span class="status-badge badge-underreview">
+            <i class="bi bi-hourglass-split"></i> Under Review
+        </span>
+        break;
+    case HealthInsuranceClaims.Domain.Enums.ClaimStatus.InformationRequested:
+        <span class="status-badge badge-inforequested">
+            <i class="bi bi-question-circle"></i> Info Requested
+        </span>
+        break;
+    case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Resubmitted:
+        <span class="status-badge badge-resubmitted">
+            <i class="bi bi-arrow-repeat"></i> Resubmitted
+        </span>
+        break;
+    case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Approved:
+        <span class="status-badge badge-approved">
+            <i class="bi bi-check-circle-fill"></i> Approved
+        </span>
+        break;
+    case HealthInsuranceClaims.Domain.Enums.ClaimStatus.PartiallyApproved:
+        <span class="status-badge badge-partiallyapproved">
+            <i class="bi bi-check-circle"></i> Partially Approved
+        </span>
+        break;
+    case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Rejected:
+        <span class="status-badge badge-rejected">
+            <i class="bi bi-x-circle-fill"></i> Rejected
+        </span>
+        break;
+    case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Closed:
+        <span class="status-badge badge-closed">
+            <i class="bi bi-lock-fill"></i> Closed
+        </span>
+        break;
+    default:
+        <span class="status-badge bg-secondary text-white">@Model</span>
+        break;
+}

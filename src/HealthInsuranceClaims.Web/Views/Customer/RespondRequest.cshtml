@@ -1,0 +1,95 @@
+@using HealthInsuranceClaims.Application.ViewModels.Claims
+@model RespondInformationViewModel
+@{
+    ViewData["Title"] = $"Respond to Information Request - {Model.ClaimReferenceNumber}";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning py-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-question-circle-fill me-2"></i>Officer Information Request
+                </h5>
+                <small class="text-dark">Claim Reference: <strong>@Model.ClaimReferenceNumber</strong></small>
+            </div>
+            <div class="card-body p-4">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Please review the errors below.
+                        <div asp-validation-summary="All" class="text-danger small mt-2"></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="alert alert-light border mb-4">
+                    <h6 class="fw-bold text-secondary mb-1"><i class="bi bi-chat-left-quote-fill me-1 text-warning"></i>Officer Request Message:</h6>
+                    <p class="fs-6 text-dark mb-0 fst-italic">"@Model.LatestOfficerRequest"</p>
+                </div>
+
+                <!-- Supplemental Document Upload Form -->
+                <div class="card bg-light border-0 mb-4">
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-cloud-arrow-up-fill me-1 text-primary"></i>Upload Supplemental Document (Optional)</h6>
+                        <form asp-controller="Claims" asp-action="UploadDocument" method="post" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ClaimId" value="@Model.ClaimId" />
+
+                            <div class="row g-2 align-items-center">
+                                <div class="col-md-5">
+                                    <select name="DocumentType" class="form-select form-select-sm" required>
+                                        <option value="HospitalBill">Hospital Bill</option>
+                                        <option value="DischargeSummary">Discharge Summary</option>
+                                        <option value="MedicalPrescription">Medical Prescription</option>
+                                        <option value="LaboratoryReport">Laboratory Report</option>
+                                        <option value="DiagnosticReport">Diagnostic Report</option>
+                                        <option value="OtherSupportingDocument" selected>Other Supporting Document</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="file" name="File" class="form-control form-control-sm" required />
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                        Upload
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Customer Written Response Form -->
+                <form asp-action="RespondRequest" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ClaimId" />
+                    <input type="hidden" asp-for="ClaimReferenceNumber" />
+                    <input type="hidden" asp-for="LatestOfficerRequest" />
+
+                    <div class="mb-3">
+                        <label asp-for="ResponseComment" class="form-label fw-semibold">
+                            Your Response / Clarification Explanation <span class="text-danger">*</span>
+                        </label>
+                        <textarea asp-for="ResponseComment" rows="4" class="form-control" placeholder="Provide requested details or describe uploaded supplemental records..."></textarea>
+                        <span asp-validation-for="ResponseComment" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a asp-action="Track" asp-route-id="@Model.ClaimId" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-send-fill me-1"></i> Submit Clarification to Officer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

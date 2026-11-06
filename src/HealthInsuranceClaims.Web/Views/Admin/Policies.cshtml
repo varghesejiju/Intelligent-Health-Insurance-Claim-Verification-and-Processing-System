@@ -1,0 +1,88 @@
+@using HealthInsuranceClaims.Application.ViewModels.Policies
+@model List<PolicyListViewModel>
+@{
+    ViewData["Title"] = "Manage Insurance Policies";
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-file-earmark-medical text-primary me-2"></i>Insurance Policies Catalog</h3>
+        <p class="text-muted mb-0">Configure master insurance policies, category coverage rules, and exclusions</p>
+    </div>
+    <a asp-action="CreatePolicy" class="btn btn-primary fw-semibold">
+        <i class="bi bi-plus-circle me-1"></i> Add New Policy
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Policy #</th>
+                        <th>Policy Name</th>
+                        <th>Type</th>
+                        <th>Overall Cap</th>
+                        <th>Validity Period</th>
+                        <th>Coverages</th>
+                        <th>Exclusions</th>
+                        <th>Assigned</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var policy in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-primary">@policy.PolicyNumber</td>
+                            <td class="fw-semibold">@policy.PolicyName</td>
+                            <td><span class="badge bg-light text-dark border">@policy.PolicyType</span></td>
+                            <td class="fw-semibold">
+                                @(policy.OverallCoverageLimit.HasValue ? $"₹{policy.OverallCoverageLimit.Value:N2}" : "Uncapped")
+                            </td>
+                            <td class="small text-muted">
+                                @policy.StartDate.ToString("dd-MMM-yy") to @policy.EndDate.ToString("dd-MMM-yy")
+                            </td>
+                            <td><span class="badge bg-success-subtle text-success border border-success-subtle">@policy.CoveragesCount rule(s)</span></td>
+                            <td><span class="badge bg-danger-subtle text-danger border border-danger-subtle">@policy.ExclusionsCount exclusion(s)</span></td>
+                            <td><span class="badge bg-info-subtle text-info border border-info-subtle">@policy.AssignedCustomersCount customer(s)</span></td>
+                            <td>
+                                <span class="badge @(policy.IsActive ? "bg-success" : "bg-danger")">
+                                    @(policy.IsActive ? "Active" : "Inactive")
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a asp-action="ManagePolicy" asp-route-id="@policy.PolicyId" class="btn btn-sm btn-outline-primary" title="Configure Rules">
+                                        <i class="bi bi-gear-fill me-1"></i> Rules
+                                    </a>
+                                    <a asp-action="EditPolicy" asp-route-id="@policy.PolicyId" class="btn btn-sm btn-outline-secondary" title="Edit Parameters">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-action="TogglePolicyStatus" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@policy.PolicyId" />
+                                        <button type="submit" class="btn btn-sm @(policy.IsActive ? "btn-outline-danger" : "btn-outline-success")" title="@(policy.IsActive ? "Deactivate" : "Activate")">
+                                            <i class="bi @(policy.IsActive ? "bi-slash-circle" : "bi-check-circle")"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

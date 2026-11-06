@@ -1,0 +1,271 @@
+@using HealthInsuranceClaims.Application.ViewModels.Dashboard
+@model AiRiskAnalyticsViewModel
+@{
+    ViewData["Title"] = "Claim Intelligence & Fraud Risk Analytics";
+    Layout = "_Layout";
+}
+
+<div class="row align-items-center mb-4">
+    <div class="col-md-8">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-cpu-fill text-primary me-2"></i>Claim Intelligence & Fraud Risk Analytics
+        </h3>
+        <p class="text-muted mb-0">System-wide AI audit, anomaly detection distribution & machine learning model telemetry</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <form asp-action="RetrainAiModel" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-primary fw-semibold shadow-sm" onclick="return confirm('Retrain FastTree model on updated claims dataset?');">
+                <i class="bi bi-arrow-repeat me-1"></i> Retrain Model
+            </button>
+        </form>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- AI Risk Metric Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0 stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Total Evaluated</span>
+                    <h3 class="fw-bold mb-0 text-dark">@Model.TotalEvaluatedClaims</h3>
+                </div>
+                <div class="p-3 bg-primary-subtle text-primary rounded-circle">
+                    <i class="bi bi-clipboard2-pulse fs-4"></i>
+                </div>
+            </div>
+            <span class="text-muted small mt-2 d-inline-block">100% evaluated by AI Model</span>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0 stat-card stat-success p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Low Risk (Compliant)</span>
+                    <h3 class="fw-bold mb-0 text-success">@Model.LowRiskCount</h3>
+                </div>
+                <div class="p-3 bg-success-subtle text-success rounded-circle">
+                    <i class="bi bi-shield-check fs-4"></i>
+                </div>
+            </div>
+            <span class="text-success small mt-2 d-inline-block fw-semibold">@Model.LowRiskPercentage% of portfolio</span>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0 stat-card stat-warning p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Medium Risk (Review)</span>
+                    <h3 class="fw-bold mb-0 text-warning">@Model.MediumRiskCount</h3>
+                </div>
+                <div class="p-3 bg-warning-subtle text-warning rounded-circle">
+                    <i class="bi bi-shield-slash fs-4"></i>
+                </div>
+            </div>
+            <span class="text-warning small mt-2 d-inline-block fw-semibold">@Model.MediumRiskPercentage% of portfolio</span>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0 stat-card stat-danger p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">High Risk (Anomalous)</span>
+                    <h3 class="fw-bold mb-0 text-danger">@Model.HighRiskCount</h3>
+                </div>
+                <div class="p-3 bg-danger-subtle text-danger rounded-circle">
+                    <i class="bi bi-shield-exclamation fs-4"></i>
+                </div>
+            </div>
+            <span class="text-danger small mt-2 d-inline-block fw-semibold">@Model.HighRiskPercentage% of portfolio</span>
+        </div>
+    </div>
+</div>
+
+<!-- Model Telemetry & Architecture Row -->
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body p-4">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-7">
+                <h5 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-diagram-3-fill text-primary me-2"></i>FastTree (GBDT) Pipeline Telemetry
+                </h5>
+                <p class="text-muted small mb-0">
+                    Gradient Boosted Decision Trees trained with 100 boosting iterations and min-max feature vector normalization.
+                </p>
+            </div>
+            <div class="col-lg-5">
+                <div class="row g-2 text-center">
+                    <div class="col-4">
+                        <div class="p-2 bg-white rounded border">
+                            <span class="small text-muted d-block">Accuracy</span>
+                            <strong class="text-primary fs-6">@Model.ModelAccuracy%</strong>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 bg-white rounded border">
+                            <span class="small text-muted d-block">ROC-AUC</span>
+                            <strong class="text-success fs-6">@Model.ModelAucRoc</strong>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 bg-white rounded border">
+                            <span class="small text-muted d-block">F1-Score</span>
+                            <strong class="text-info fs-6">@Model.ModelF1Score</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- High Risk Watchlist -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0 text-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>Priority Anomaly & Fraud Risk Watchlist
+        </h5>
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+            Requires Mandatory Senior Officer Audit
+        </span>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.HighRiskWatchlist.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Claim Ref #</th>
+                            <th>Customer / Patient</th>
+                            <th>Hospital</th>
+                            <th>Claimed Amount</th>
+                            <th>Risk Score</th>
+                            <th>AI Recommendation</th>
+                            <th>Top Identified Risk Indicators</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model.HighRiskWatchlist)
+                        {
+                            <tr>
+                                <td class="fw-bold text-primary">@claim.ClaimReferenceNumber</td>
+                                <td>
+                                    <strong>@claim.PatientName</strong>
+                                    <div class="small text-muted">@claim.CustomerName</div>
+                                </td>
+                                <td class="small text-muted">@claim.HospitalName</td>
+                                <td class="fw-semibold">₹@claim.TotalClaimedAmount.ToString("N2")</td>
+                                <td>
+                                    <span class="badge @claim.RiskLevelBadgeClass px-2 py-1">
+                                        @claim.FraudRiskScore% (@claim.RiskLevel)
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @claim.RecommendedDecision (@claim.DecisionConfidence%)
+                                    </span>
+                                </td>
+                                <td class="small text-secondary" style="max-width: 350px;">
+                                    @if (claim.RiskFactors.Any())
+                                    {
+                                        <div class="text-truncate" title="@string.Join("; ", claim.RiskFactors)">
+                                            @claim.RiskFactors.First()
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="ClaimDetails" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-search me-1"></i> Inspect
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="p-4 text-center text-muted">
+                <i class="bi bi-shield-check fs-1 text-success d-block mb-2"></i>
+                <p class="mb-0">No anomalous or high-risk claims flagged in the portfolio.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Recent AI Assessments Stream -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-clock-history text-primary me-2"></i>All Portfolio Claims Evaluated by AI Model
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Claim Ref #</th>
+                        <th>Patient</th>
+                        <th>Hospital</th>
+                        <th>Claimed</th>
+                        <th>AI Estimated Payout</th>
+                        <th>AI Decision</th>
+                        <th>Risk Level</th>
+                        <th>Assessment Time</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model.RecentAssessments)
+                    {
+                        <tr>
+                            <td class="fw-bold text-primary">@claim.ClaimReferenceNumber</td>
+                            <td>@claim.PatientName</td>
+                            <td class="small text-muted">@claim.HospitalName</td>
+                            <td class="fw-semibold">₹@claim.TotalClaimedAmount.ToString("N2")</td>
+                            <td class="fw-semibold text-success">₹@claim.EstimatedAdmissibleAmount.ToString("N2")</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    @claim.RecommendedDecision
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @claim.RiskLevelBadgeClass px-2 py-1">
+                                    @claim.RiskLevel (@claim.FraudRiskScore%)
+                                </span>
+                            </td>
+                            <td class="small text-muted">
+                                @claim.AssessmentDate.ToString("dd-MMM hh:mm tt")
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="ClaimDetails" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

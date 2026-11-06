@@ -1,0 +1,99 @@
+@using HealthInsuranceClaims.Application.ViewModels.Claims
+@model List<ClaimListViewModel>
+@{
+    ViewData["Title"] = "Pending Review Queue";
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-hourglass-split text-warning me-2"></i>Officer Review Queue
+        </h3>
+        <p class="text-muted mb-0">Claims awaiting officer inspection, verification check, and settlement decisions</p>
+    </div>
+    <span class="badge bg-warning text-dark fs-6 px-3 py-2">@Model.Count Claim(s) Awaiting Review</span>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Claim Ref #</th>
+                            <th>Customer Name</th>
+                            <th>Patient</th>
+                            <th>Policy Number</th>
+                            <th>Hospital</th>
+                            <th>Claimed Amount</th>
+                            <th>Indicative Eligible</th>
+                            <th>Exceptions</th>
+                            <th>Status</th>
+                            <th>Submitted Date</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold text-primary">@claim.ClaimReferenceNumber</td>
+                                <td>@claim.CustomerName</td>
+                                <td class="fw-semibold">@claim.PatientName</td>
+                                <td><span class="badge bg-light text-dark border">@claim.PolicyNumber</span></td>
+                                <td class="small text-muted">@claim.HospitalName</td>
+                                <td class="fw-semibold">₹@claim.TotalClaimedAmount.ToString("N2")</td>
+                                <td>
+                                    @if (claim.IndicativeEligibleAmount.HasValue)
+                                    {
+                                        <span class="text-success fw-bold">₹@claim.IndicativeEligibleAmount.Value.ToString("N2")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (claim.HasExceptions)
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Review Required
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-check-lg me-1"></i> No Exceptions
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <partial name="_StatusBadge" model="claim.ClaimStatus" />
+                                </td>
+                                <td class="text-muted small">
+                                    @(claim.SubmittedDate.HasValue ? claim.SubmittedDate.Value.ToString("dd-MMM-yyyy") : "")
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Review" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-search me-1"></i> Review Claim
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="p-5 text-center text-muted">
+                <i class="bi bi-clipboard2-check fs-1 d-block mb-3 text-success"></i>
+                <h5>No Pending Claims</h5>
+                <p class="small mb-0">All submitted claims have been reviewed.</p>
+            </div>
+        }
+    </div>
+</div>

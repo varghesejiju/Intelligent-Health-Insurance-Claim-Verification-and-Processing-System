@@ -1,0 +1,99 @@
+@using HealthInsuranceClaims.Application.ViewModels.Claims
+@model CreateClaimViewModel
+@{
+    ViewData["Title"] = "Create Health Insurance Claim";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-navy text-white py-3" style="background-color: #1a2e4c;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-file-earmark-medical fs-3 me-2 text-info"></i>
+                    <div>
+                        <h4 class="mb-0 fs-5 fw-bold text-white">Create New Health Insurance Claim</h4>
+                        <small class="text-white-50">Step 1: Enter Hospitalization and Patient Details</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Please check the input errors.
+                        <div asp-validation-summary="All" class="text-danger small mt-2"></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="PolicyId" class="form-label fw-semibold">Select Insurance Policy <span class="text-danger">*</span></label>
+                            <select asp-for="PolicyId" asp-items="ViewBag.Policies" class="form-select" required>
+                                <option value="">-- Choose Assigned Policy --</option>
+                            </select>
+                            <span asp-validation-for="PolicyId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="HospitalId" class="form-label fw-semibold">Network Hospital <span class="text-danger">*</span></label>
+                            <select asp-for="HospitalId" asp-items="ViewBag.Hospitals" class="form-select" required>
+                                <option value="">-- Choose Hospital --</option>
+                            </select>
+                            <span asp-validation-for="HospitalId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PatientName" class="form-label fw-semibold">Patient Name <span class="text-danger">*</span></label>
+                            <input asp-for="PatientName" class="form-control" placeholder="Patient's Full Legal Name" required />
+                            <span asp-validation-for="PatientName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="ClaimType" class="form-label fw-semibold">Claim Settlement Type</label>
+                            <select asp-for="ClaimType" class="form-select">
+                                <option value="Reimbursement">Reimbursement</option>
+                                <option value="Cashless">Cashless Settlement</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="AdmissionDate" class="form-label fw-semibold">Admission Date <span class="text-danger">*</span></label>
+                            <input asp-for="AdmissionDate" type="date" class="form-control" required />
+                            <span asp-validation-for="AdmissionDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="DischargeDate" class="form-label fw-semibold">Discharge Date <span class="text-danger">*</span></label>
+                            <input asp-for="DischargeDate" type="date" class="form-control" required />
+                            <span asp-validation-for="DischargeDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="ClaimDescription" class="form-label fw-semibold">Medical Diagnosis / Treatment Description</label>
+                            <textarea asp-for="ClaimDescription" rows="3" class="form-control" placeholder="Briefly describe the illness, diagnosis or treatment procedures undergone..."></textarea>
+                            <span asp-validation-for="ClaimDescription" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-2 border-top">
+                        <a asp-controller="Customer" asp-action="Claims" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            Continue to Add Expenses &rarr;
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

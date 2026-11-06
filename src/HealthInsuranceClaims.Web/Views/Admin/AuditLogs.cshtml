@@ -1,0 +1,103 @@
+@using HealthInsuranceClaims.Domain.Entities
+@model List<AuditLog>
+@{
+    ViewData["Title"] = "System Audit Logs";
+    Layout = "_Layout";
+}
+
+<div class="mb-4">
+    <h3 class="fw-bold text-dark mb-1">
+        <i class="bi bi-journal-text text-danger me-2"></i>System Security & Audit Logs
+    </h3>
+    <p class="text-muted mb-0">Immutable chronological record of logins, policy modifications, claims submissions, and officer decisions</p>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="Search user, entity or details keywords..." value="@ViewBag.Search" />
+            </div>
+            <div class="col-md-4">
+                <select name="actionType" class="form-select form-select-sm">
+                    <option value="">-- All Actions --</option>
+                    <option value="UserLogin">UserLogin</option>
+                    <option value="CustomerRegistration">CustomerRegistration</option>
+                    <option value="DraftClaimCreated">DraftClaimCreated</option>
+                    <option value="ClaimSubmitted">ClaimSubmitted</option>
+                    <option value="ClaimUnderReview">ClaimUnderReview</option>
+                    <option value="InformationRequested">InformationRequested</option>
+                    <option value="ClaimResubmitted">ClaimResubmitted</option>
+                    <option value="ClaimApproved">ClaimApproved</option>
+                    <option value="ClaimPartiallyApproved">ClaimPartiallyApproved</option>
+                    <option value="ClaimRejected">ClaimRejected</option>
+                    <option value="DocumentUploaded">DocumentUploaded</option>
+                    <option value="PolicyCreated">PolicyCreated</option>
+                    <option value="PolicyUpdated">PolicyUpdated</option>
+                    <option value="CoverageAdded">CoverageAdded</option>
+                    <option value="ExclusionAdded">ExclusionAdded</option>
+                    <option value="HospitalCreated">HospitalCreated</option>
+                    <option value="PolicyAssigned">PolicyAssigned</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-search me-1"></i> Filter Logs
+                </button>
+                <a asp-action="AuditLogs" class="btn btn-outline-secondary btn-sm" title="Clear Filters">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Timestamp (UTC)</th>
+                            <th>Action</th>
+                            <th>User</th>
+                            <th>Entity Type</th>
+                            <th>Entity ID</th>
+                            <th>Activity Details</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model)
+                        {
+                            <tr>
+                                <td class="text-muted fw-semibold">@log.Timestamp.ToString("dd-MMM-yyyy HH:mm:ss")</td>
+                                <td>
+                                    <span class="badge @(log.Action.Contains("Approved") ? "bg-success" : log.Action.Contains("Rejected") ? "bg-danger" : log.Action.Contains("Submitted") ? "bg-primary" : "bg-secondary")">
+                                        @log.Action
+                                    </span>
+                                </td>
+                                <td class="fw-bold text-dark">@log.UserName</td>
+                                <td><span class="badge bg-light text-dark border">@log.EntityType</span></td>
+                                <td class="text-muted">@(log.EntityId ?? "-")</td>
+                                <td>@log.Details</td>
+                                <td class="text-muted small">@(log.IpAddress ?? "::1")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="p-5 text-center text-muted">
+                <i class="bi bi-journal-x fs-1 d-block mb-3 text-secondary"></i>
+                <h5>No Audit Records Found</h5>
+                <p class="small mb-0">No matching activities recorded for the selected filter.</p>
+            </div>
+        }
+    </div>
+</div>

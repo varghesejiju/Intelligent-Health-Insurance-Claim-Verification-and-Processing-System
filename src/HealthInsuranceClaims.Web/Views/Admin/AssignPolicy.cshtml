@@ -1,0 +1,121 @@
+@using HealthInsuranceClaims.Application.ViewModels.Policies
+@using HealthInsuranceClaims.Domain.Entities
+@model AssignPolicyViewModel
+@{
+    ViewData["Title"] = "Assign Policies";
+    Layout = "_Layout";
+    var assignments = ViewBag.Assignments as List<CustomerPolicy> ?? new List<CustomerPolicy>();
+}
+
+<div class="mb-4">
+    <h3 class="fw-bold text-dark mb-1"><i class="bi bi-person-check text-primary me-2"></i>Customer Policy Allocation</h3>
+    <p class="text-muted mb-0">Assign active health insurance policies to registered customer accounts</p>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Assignment Form -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-navy text-white py-3" style="background-color: #1a2e4c;">
+                <h5 class="mb-0 fw-bold text-white"><i class="bi bi-plus-circle me-2"></i>Assign Policy to Customer</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="AssignPolicy" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="CustomerId" class="form-label fw-semibold">Select Customer <span class="text-danger">*</span></label>
+                        <select asp-for="CustomerId" asp-items="ViewBag.Customers" class="form-select" required>
+                            <option value="">-- Choose Customer --</option>
+                        </select>
+                        <span asp-validation-for="CustomerId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PolicyId" class="form-label fw-semibold">Select Insurance Policy <span class="text-danger">*</span></label>
+                        <select asp-for="PolicyId" asp-items="ViewBag.Policies" class="form-select" required>
+                            <option value="">-- Choose Policy --</option>
+                        </select>
+                        <span asp-validation-for="PolicyId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ExpiryDate" class="form-label fw-semibold">Policy Expiration Date <span class="text-danger">*</span></label>
+                        <input asp-for="ExpiryDate" type="date" class="form-control" required />
+                        <span asp-validation-for="ExpiryDate" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                        <i class="bi bi-link-45deg me-1"></i> Assign Policy to Customer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Assignments Table -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-card-checklist me-2 text-primary"></i>Active Customer Allocations</h5>
+                <span class="badge bg-light text-dark border">@assignments.Count assignment(s)</span>
+            </div>
+            <div class="card-body p-0">
+                @if (assignments.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Policy Number</th>
+                                    <th>Assigned On</th>
+                                    <th>Expires On</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var a in assignments)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong class="text-dark">@(a.Customer?.FullName ?? "Unknown")</strong>
+                                            <div class="text-muted" style="font-size: 0.75rem;">@a.Customer?.Email</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">@a.Policy?.PolicyNumber</span>
+                                            <div class="text-muted" style="font-size: 0.75rem;">@a.Policy?.PolicyName</div>
+                                        </td>
+                                        <td class="text-muted">@a.AssignedDate.ToString("dd-MMM-yyyy")</td>
+                                        <td class="text-danger fw-semibold">@a.ExpiryDate.ToString("dd-MMM-yyyy")</td>
+                                        <td>
+                                            <span class="badge @(a.IsActive ? "bg-success" : "bg-danger")">
+                                                @(a.IsActive ? "Active" : "Expired")
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small text-center p-4 mb-0">No customer policy assignments found.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

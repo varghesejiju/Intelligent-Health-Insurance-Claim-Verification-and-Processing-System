@@ -1,0 +1,446 @@
+@using HealthInsuranceClaims.Application.ViewModels.Claims
+@model ClaimDetailsViewModel
+@{
+    ViewData["Title"] = $"Claim - {Model.ClaimReferenceNumber}";
+    Layout = "_Layout";
+    bool isDraft = Model.ClaimStatus == ClaimStatus.Draft;
+    bool isCustomer = User.IsInRole("Customer");
+}
+
+<div class="mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center">
+        <div>
+            @if (isCustomer)
+            {
+                <a asp-controller="Customer" asp-action="Claims" class="btn btn-outline-secondary btn-sm mb-2">
+                    <i class="bi bi-arrow-left me-1"></i> Back to My Claims
+                </a>
+            }
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-file-earmark-medical text-primary me-2"></i>Claim: @Model.ClaimReferenceNumber
+            </h3>
+            <p class="text-muted mb-0">Patient: <strong>@Model.PatientName</strong> | Hospital: <strong>@Model.HospitalName</strong></p>
+        </div>
+        <div class="mt-2 mt-md-0 d-flex align-items-center gap-2">
+            <partial name="_StatusBadge" model="Model.ClaimStatus" />
+            @if (!isDraft && isCustomer)
+            {
+                <a asp-controller="Customer" asp-action="Track" asp-route-id="@Model.ClaimId" class="btn btn-primary btn-sm">
+                    <i class="bi bi-crosshair me-1"></i> Track Status
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Left Column: Claim Details & Medical Expenses -->
+    <div class="col-lg-8">
+        <!-- Claim Summary Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-info-circle me-2 text-primary"></i>Hospitalization Details</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-sm-4">
+                        <span class="text-muted small d-block">Insurance Policy:</span>
+                        <span class="fw-semibold text-primary">@Model.PolicyNumber</span>
+                        <div class="small text-muted">@Model.PolicyName</div>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted small d-block">Hospital:</span>
+                        <span class="fw-semibold text-dark">@Model.HospitalName</span>
+                        <div class="small text-muted">@Model.HospitalAddress</div>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted small d-block">Settlement Type:</span>
+                        <span class="badge bg-light text-dark border">@Model.ClaimType</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted small d-block">Admission Date:</span>
+                        <span class="fw-semibold">@Model.AdmissionDate.ToString("dd-MMM-yyyy")</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted small d-block">Discharge Date:</span>
+                        <span class="fw-semibold">@Model.DischargeDate.ToString("dd-MMM-yyyy")</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted small d-block">Created On:</span>
+                        <span class="text-muted small">@Model.CreatedDate.ToString("dd-MMM-yyyy hh:mm tt")</span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.ClaimDescription))
+                    {
+                        <div class="col-12 mt-2">
+                            <span class="text-muted small d-block">Diagnosis / Treatment Notes:</span>
+                            <p class="small text-secondary mb-0 bg-light p-2 rounded">@Model.ClaimDescription</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Expense Line Items -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-receipt me-2 text-primary"></i>Medical Expenses Breakdown</h5>
+                @if (isDraft && isCustomer)
+                {
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                        <i class="bi bi-plus-lg me-1"></i> Add Expense Item
+                    </button>
+                }
+            </div>
+            <div class="card-body p-0">
+                @if (Model.Expenses.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Expense Date</th>
+                                    <th class="text-end">Claimed Amount</th>
+                                    @if (isDraft && isCustomer)
+                                    {
+                                        <th class="text-center" style="width: 80px;">Action</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var exp in Model.Expenses)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold text-dark">
+                                            <i class="bi bi-tag-fill me-1 text-primary small"></i>@exp.ExpenseCategory
+                                        </td>
+                                        <td>@exp.ExpenseDescription</td>
+                                        <td class="text-muted small">@exp.ExpenseDate.ToString("dd-MMM-yyyy")</td>
+                                        <td class="text-end fw-bold text-dark">₹@exp.ClaimedAmount.ToString("N2")</td>
+                                        @if (isDraft && isCustomer)
+                                        {
+                                            <td class="text-center">
+                                                <form asp-action="RemoveExpense" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="expenseId" value="@exp.ExpenseId" />
+                                                    <input type="hidden" name="claimId" value="@Model.ClaimId" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Delete Expense" onclick="return confirm('Remove this expense item?');">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr class="fs-6">
+                                    <th colspan="3" class="text-end fw-bold">Total Claimed Amount:</th>
+                                    <th class="text-end fw-bold text-primary">₹@Model.TotalClaimedAmount.ToString("N2")</th>
+                                    @if (isDraft && isCustomer)
+                                    {
+                                        <th></th>
+                                    }
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-receipt fs-1 d-block mb-2 text-secondary"></i>
+                        <p class="mb-2">No medical expenses added to this claim yet.</p>
+                        @if (isDraft && isCustomer)
+                        {
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                                <i class="bi bi-plus-lg me-1"></i> Add First Expense Item
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Automatic Verification Results Display (If verified) -->
+        @if (Model.LatestVerificationRun != null)
+        {
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-cpu me-2 text-primary"></i>System Verification Results (Advisory)
+                    </h5>
+                    <span class="badge @(Model.LatestVerificationRun.HasExceptions ? "bg-warning text-dark" : "bg-success") px-3 py-2">
+                        @(Model.LatestVerificationRun.HasExceptions ? "Exceptions Requiring Officer Review" : "Rules Fully Verified")
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3 mb-3 text-center">
+                        <div class="col-4">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted d-block fw-semibold">Total Claimed</small>
+                                <h5 class="fw-bold text-dark mb-0">₹@Model.LatestVerificationRun.TotalClaimed.ToString("N2")</h5>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3 bg-success-subtle rounded border border-success-subtle">
+                                <small class="text-success d-block fw-semibold">Indicative Eligible</small>
+                                <h5 class="fw-bold text-success mb-0">₹@Model.LatestVerificationRun.TotalEligible.ToString("N2")</h5>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3 bg-danger-subtle rounded border border-danger-subtle">
+                                <small class="text-danger d-block fw-semibold">Non-Eligible Deductions</small>
+                                <h5 class="fw-bold text-danger mb-0">₹@Model.LatestVerificationRun.TotalNonEligible.ToString("N2")</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Line Item Results -->
+                    <h6 class="fw-bold text-dark mb-2">Category Rule Calculations:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered small align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Claimed</th>
+                                    <th>Eligible</th>
+                                    <th>Deduction</th>
+                                    <th>Verification Explanation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in Model.LatestVerificationRun.Results)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@r.ExpenseCategory</td>
+                                        <td>₹@r.ClaimedAmount.ToString("N2")</td>
+                                        <td class="text-success fw-bold">₹@r.EligibleAmount.ToString("N2")</td>
+                                        <td class="@(r.NonEligibleAmount > 0 ? "text-danger fw-bold" : "text-muted")">₹@r.NonEligibleAmount.ToString("N2")</td>
+                                        <td class="text-secondary">@r.Reason</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (Model.LatestVerificationRun.Exceptions.Any())
+                    {
+                        <div class="alert alert-warning mt-3 mb-0 small">
+                            <h6 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Flagged Verification Exceptions:</h6>
+                            <ul class="mb-0 ps-3">
+                                @foreach (var exc in Model.LatestVerificationRun.Exceptions)
+                                {
+                                    <li><strong>@exc.ExceptionType:</strong> @exc.Message</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Right Column: Document Attachments & Submission -->
+    <div class="col-lg-4">
+        <!-- Submission Action Box for Draft -->
+        @if (isDraft && isCustomer)
+        {
+            <div class="card shadow-sm border-0 border-top border-4 border-primary mb-4">
+                <div class="card-body p-4 text-center">
+                    <h5 class="fw-bold text-dark mb-2">Ready to Submit?</h5>
+                    <p class="text-muted small mb-3">
+                        Once submitted, the system will execute rule-based policy verification and forward the claim to the Insurance Officer for final decision.
+                    </p>
+
+                    @if (Model.Expenses.Any() && Model.TotalClaimedAmount > 0)
+                    {
+                        <form asp-action="Submit" method="post" asp-route-id="@Model.ClaimId">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-sm" onclick="return confirm('Are you sure you want to submit this claim for verification?');">
+                                <i class="bi bi-send-check me-1"></i> Submit Claim Now
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary btn-lg w-100" disabled>
+                            Add Expenses First
+                        </button>
+                        <small class="text-danger d-block mt-2">At least 1 medical expense item is required before submission.</small>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Supporting Documents Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-paperclip me-2 text-primary"></i>Supporting Documents</h6>
+                @if (isDraft && isCustomer)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#uploadDocModal">
+                        <i class="bi bi-upload me-1"></i> Upload
+                    </button>
+                }
+            </div>
+            <div class="card-body p-3">
+                @if (Model.Documents.Any())
+                {
+                    <div class="list-group list-group-flush small">
+                        @foreach (var doc in Model.Documents)
+                        {
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                <div>
+                                    <i class="bi bi-file-earmark-medical text-danger fs-5 me-2"></i>
+                                    <strong>@doc.OriginalFileName</strong>
+                                    <span class="badge bg-light text-dark border ms-1">@doc.DocumentType</span>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        Uploaded: @doc.UploadedDate.ToString("dd-MMM-yyyy") | @(doc.FileSize / 1024) KB
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <a asp-controller="Documents" asp-action="Download" asp-route-id="@doc.DocumentId" class="btn btn-sm btn-outline-primary" target="_blank" title="Download Document">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                    @if (isDraft && isCustomer)
+                                    {
+                                        <form asp-action="DeleteDocument" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="documentId" value="@doc.DocumentId" />
+                                            <input type="hidden" name="claimId" value="@Model.ClaimId" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Document" onclick="return confirm('Delete this file?');">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small text-center mb-0">No documents attached.</p>
+                    @if (isDraft && isCustomer)
+                    {
+                        <div class="text-center mt-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadDocModal">
+                                Upload Hospital Bills & Reports
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Expense Item -->
+@if (isDraft && isCustomer)
+{
+    <div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addExpenseModalLabel"><i class="bi bi-plus-circle me-1"></i> Add Medical Expense</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="AddExpense" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ClaimId" value="@Model.ClaimId" />
+
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Expense Category <span class="text-danger">*</span></label>
+                            <select name="ExpenseCategory" class="form-select" required>
+                                <option value="HospitalRoomCharges">Hospital Room Charges</option>
+                                <option value="SurgeryCharges">Surgery Charges</option>
+                                <option value="DoctorConsultation">Doctor Consultation</option>
+                                <option value="MedicineExpenses">Medicine Expenses</option>
+                                <option value="LaboratoryTests">Laboratory Tests</option>
+                                <option value="DiagnosticScans">Diagnostic Scans</option>
+                                <option value="OtherMedicalExpenses">Other Medical Expenses</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Item Description <span class="text-danger">*</span></label>
+                            <input type="text" name="ExpenseDescription" class="form-control" placeholder="e.g. ICU Room Rent (2 days)" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Expense Date <span class="text-danger">*</span></label>
+                            <input type="date" name="ExpenseDate" class="form-control" value="@DateTime.UtcNow.ToString("yyyy-MM-dd")" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Claimed Amount (₹) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="1" name="ClaimedAmount" class="form-control" placeholder="1000.00" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fw-semibold">Save Expense Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Upload Supporting Document -->
+    <div class="modal fade" id="uploadDocModal" tabindex="-1" aria-labelledby="uploadDocModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-navy text-white" style="background-color: #1a2e4c;">
+                    <h5 class="modal-title" id="uploadDocModalLabel"><i class="bi bi-paperclip me-1"></i> Upload Supporting Document</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="UploadDocument" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ClaimId" value="@Model.ClaimId" />
+
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Document Type <span class="text-danger">*</span></label>
+                            <select name="DocumentType" class="form-select" required>
+                                <option value="HospitalBill">Hospital Bill</option>
+                                <option value="DischargeSummary">Discharge Summary</option>
+                                <option value="MedicalPrescription">Medical Prescription</option>
+                                <option value="LaboratoryReport">Laboratory Report</option>
+                                <option value="DiagnosticReport">Diagnostic Report</option>
+                                <option value="OtherSupportingDocument">Other Supporting Document</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select File <span class="text-danger">*</span></label>
+                            <input type="file" name="File" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required />
+                            <small class="text-muted">Allowed types: PDF, JPG, JPEG, PNG. Max size: 10 MB.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fw-semibold">Upload File</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

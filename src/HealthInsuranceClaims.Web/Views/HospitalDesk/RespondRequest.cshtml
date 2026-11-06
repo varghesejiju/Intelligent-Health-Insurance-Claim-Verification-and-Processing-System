@@ -1,0 +1,92 @@
+@model HealthInsuranceClaims.Application.ViewModels.Claims.ClaimDetailsViewModel
+@using HealthInsuranceClaims.Domain.Enums
+@{
+    ViewData["Title"] = $"Respond to Insurance Query - {Model.ClaimReferenceNumber}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="mb-3">
+            <a asp-action="ClaimDetails" asp-route-id="@Model.ClaimId" class="text-decoration-none text-muted small">
+                <i class="bi bi-arrow-left me-1"></i> Back to Claim Details
+            </a>
+            <h2 class="h3 fw-bold mb-1 text-dark mt-1">
+                Respond to Insurance Officer Query
+            </h2>
+            <small class="text-muted">Claim Reference: <strong class="text-primary">@Model.ClaimReferenceNumber</strong> &bull; Patient: @Model.PatientName</small>
+        </div>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Officer's Query Box -->
+        <div class="card border-warning mb-4 shadow-sm">
+            <div class="card-header bg-warning text-dark py-2 fw-semibold">
+                <i class="bi bi-question-circle-fill me-1"></i> Information Requested by Review Officer
+            </div>
+            <div class="card-body">
+                <p class="mb-2 text-muted small fw-semibold">Officer Remarks / Required Document Details:</p>
+                <div class="p-3 bg-light rounded border-start border-warning border-4 fw-semibold text-dark">
+                    @ViewBag.OfficerQuery
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Form -->
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-reply-fill text-primary me-1"></i> Submit Clarification & Supplementary Document
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="RespondRequest" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="claimId" value="@Model.ClaimId" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Hospital Desk Clarification / Comments <span class="text-danger">*</span></label>
+                        <textarea name="responseComment" rows="4" class="form-control" placeholder="Provide requested medical explanations, billing clarification, or remarks for the insurance officer..." required></textarea>
+                    </div>
+
+                    <div class="card bg-light border-0 p-3 mb-4 rounded-3">
+                        <h6 class="fw-bold mb-2 text-dark">
+                            <i class="bi bi-file-earmark-arrow-up text-primary me-1"></i> Attach Supplementary Document (Optional)
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label small fw-semibold">Document Type</label>
+                                <select name="documentType" class="form-select">
+                                    <option value="@DocumentType.LaboratoryReport">Laboratory Report</option>
+                                    <option value="@DocumentType.DiagnosticReport">Diagnostic Scan / Imaging</option>
+                                    <option value="@DocumentType.HospitalBill">Revised Hospital Bill / Invoice</option>
+                                    <option value="@DocumentType.MedicalPrescription">Doctor Prescription / Notes</option>
+                                    <option value="@DocumentType.DischargeSummary">Discharge Summary</option>
+                                    <option value="@DocumentType.OtherSupportingDocument">Other Medical Document</option>
+                                </select>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label small fw-semibold">Choose File (PDF, JPG, PNG)</label>
+                                <input type="file" name="additionalFile" class="form-control" accept=".pdf,.jpg,.jpeg,.png" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a asp-action="ClaimDetails" asp-route-id="@Model.ClaimId" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-send-check me-1"></i> Resubmit Claim to Officer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

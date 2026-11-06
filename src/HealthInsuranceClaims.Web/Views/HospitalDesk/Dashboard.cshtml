@@ -1,0 +1,214 @@
+@model HealthInsuranceClaims.Application.ViewModels.Dashboard.HospitalDeskDashboardViewModel
+@{
+    ViewData["Title"] = "Hospital TPA Desk Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h3 fw-bold mb-1 text-dark">
+            <i class="bi bi-hospital text-primary me-2"></i>Hospital TPA & Billing Desk
+        </h2>
+        <p class="text-muted mb-0">@Model.HospitalName &bull; Direct Hospital Claim & Document Submission Portal</p>
+    </div>
+    <div>
+        <a asp-action="CreateClaim" class="btn btn-primary shadow-sm px-3 py-2 fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Submit New Patient Claim
+        </a>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-primary-subtle text-primary p-3 rounded-3 me-3">
+                        <i class="bi bi-folder2-open fs-3"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Total Hospital Claims</span>
+                        <h3 class="mb-0 fw-bold">@Model.TotalClaims</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-warning-subtle text-warning p-3 rounded-3 me-3">
+                        <i class="bi bi-hourglass-split fs-3"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Pending Review</span>
+                        <h3 class="mb-0 fw-bold">@Model.PendingReviewClaims</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-danger-subtle text-danger p-3 rounded-3 me-3">
+                        <i class="bi bi-exclamation-triangle fs-3"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Action Required (Queries)</span>
+                        <h3 class="mb-0 fw-bold">@Model.InfoRequestedClaims</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-success-subtle text-success p-3 rounded-3 me-3">
+                        <i class="bi bi-check2-circle fs-3"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Approved Claims</span>
+                        <h3 class="mb-0 fw-bold">@Model.ApprovedClaims</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Summary Banner -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm bg-light">
+            <div class="card-body d-flex justify-content-between align-items-center py-3">
+                <div>
+                    <span class="text-muted fw-semibold">Total Amount Claimed (Quotations)</span>
+                    <h4 class="mb-0 fw-bold text-dark mt-1">₹@Model.TotalClaimedAmount.ToString("N2")</h4>
+                </div>
+                <i class="bi bi-cash-stack fs-1 text-primary opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm bg-light">
+            <div class="card-body d-flex justify-content-between align-items-center py-3">
+                <div>
+                    <span class="text-muted fw-semibold">Total Amount Approved by Insurance</span>
+                    <h4 class="mb-0 fw-bold text-success mt-1">₹@Model.TotalApprovedAmount.ToString("N2")</h4>
+                </div>
+                <i class="bi bi-shield-check fs-1 text-success opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Claims Table -->
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-clock-history me-1 text-primary"></i> Recently Initiated Patient Claims
+        </h5>
+        <a asp-action="Claims" class="btn btn-sm btn-outline-primary fw-semibold">
+            View All Claims <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.RecentClaims == null || !Model.RecentClaims.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                <p class="mb-2">No patient claims initiated yet by this hospital desk.</p>
+                <a asp-action="CreateClaim" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Create First Patient Claim
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Claim Ref</th>
+                            <th>Patient / Policy</th>
+                            <th>Claim Type</th>
+                            <th class="text-end">Claimed Quotation</th>
+                            <th class="text-end">Approved Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model.RecentClaims)
+                        {
+                            <tr>
+                                <td class="fw-semibold">
+                                    <span class="text-primary">@claim.ClaimReferenceNumber</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">@claim.PatientName</div>
+                                    <small class="text-muted">Policy: @claim.PolicyNumber</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary border">@claim.ClaimType</span>
+                                </td>
+                                <td class="text-end fw-semibold">
+                                    ₹@claim.TotalClaimedAmount.ToString("N2")
+                                </td>
+                                <td class="text-end fw-semibold @(claim.FinalApprovedAmount.HasValue ? "text-success" : "text-muted")">
+                                    @(claim.FinalApprovedAmount.HasValue ? $"₹{claim.FinalApprovedAmount.Value:N2}" : "—")
+                                </td>
+                                <td>
+                                    @switch (claim.ClaimStatus)
+                                    {
+                                        case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Draft:
+                                            <span class="badge bg-secondary">Draft (Add Bills)</span>
+                                            break;
+                                        case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Submitted:
+                                            <span class="badge bg-info text-dark">Submitted</span>
+                                            break;
+                                        case HealthInsuranceClaims.Domain.Enums.ClaimStatus.UnderReview:
+                                            <span class="badge bg-warning text-dark">Under Review</span>
+                                            break;
+                                        case HealthInsuranceClaims.Domain.Enums.ClaimStatus.InformationRequested:
+                                            <span class="badge bg-danger">Query Raised</span>
+                                            break;
+                                        case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Resubmitted:
+                                            <span class="badge bg-primary">Resubmitted</span>
+                                            break;
+                                        case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Approved:
+                                            <span class="badge bg-success">Approved</span>
+                                            break;
+                                        case HealthInsuranceClaims.Domain.Enums.ClaimStatus.PartiallyApproved:
+                                            <span class="badge bg-success bg-opacity-75">Partially Approved</span>
+                                            break;
+                                        case HealthInsuranceClaims.Domain.Enums.ClaimStatus.Rejected:
+                                            <span class="badge bg-danger">Rejected</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-light text-dark border">@claim.ClaimStatus</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <small class="text-muted">@claim.CreatedDate.ToString("dd-MMM-yyyy")</small>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="ClaimDetails" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye me-1"></i> Manage / View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
